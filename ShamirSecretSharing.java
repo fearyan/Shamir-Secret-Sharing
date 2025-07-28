@@ -92,7 +92,20 @@ public class ShamirSecretSharing {
         System.out.println("Secret (constant term c): " + secret + " 🤐");
     }
 
-    // Lagrange interpolation: the real MVP
+    /**
+     * Lagrange interpolation: the real MVP
+     *
+     * In plain English:
+     * - For each point, we build a "mini-polynomial" that's 1 at that point and 0 at all others.
+     * - We multiply each y-value by its mini-polynomial (the Lagrange coefficient).
+     * - Add them all up, and you get the value of the original polynomial at x=0 (the secret!).
+     *
+     * Formula:
+     *   f(0) = sum_{i=0}^{n-1} y_i * product_{j!=i} (0 - x_j) / (x_i - x_j)
+     *
+     * It's like making a smoothie: each fruit (point) gets blended in with its own special weight,
+     * and the result is delicious (the secret)!
+     */
     public static BigInteger findConstantTerm(List<Point> points) {
         int n = points.size();
         BigInteger result = BigInteger.ZERO;
@@ -103,14 +116,25 @@ public class ShamirSecretSharing {
 
             for (int j = 0; j < n; j++) {
                 if (i != j) {
+                    // For each other point, multiply by (0 - x_j) for numerator
                     numerator = numerator.multiply(BigInteger.ZERO.subtract(points.get(j).x));
+                    // And (x_i - x_j) for denominator
                     denominator = denominator.multiply(points.get(i).x.subtract(points.get(j).x));
                 }
             }
             // Lagrange coefficient: not a coffee order
             BigInteger coefficient = numerator.divide(denominator);
+            // Add this term's contribution to the result
             result = result.add(points.get(i).y.multiply(coefficient));
         }
         return result;
     }
-} 
+}
+
+/*
+   ASCII Art Easter Egg:
+
+      (\__/)
+      (•ㅅ•)   <--- This bunny knows your secret, but won't tell.
+     / 　 づ
+*/ 
